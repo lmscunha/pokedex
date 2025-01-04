@@ -16,29 +16,33 @@ func cleanInput(text string) []string {
 	})
 }
 
-func commandExit() error {
-	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
-	return nil
+type cliCommand struct {
+	name        string
+	description string
+	callback    func() error
 }
 
-func main() {
-	type cliCommand struct {
-		name        string
-		description string
-		callback    func() error
-	}
-
-	registry := map[string]cliCommand{
+func getCmds() map[string]cliCommand {
+	return map[string]cliCommand{
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
 		},
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
 	}
 
+}
+
+func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	for true {
+	registry := getCmds()
+
+	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		input := scanner.Text()
