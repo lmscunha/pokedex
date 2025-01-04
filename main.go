@@ -16,18 +16,19 @@ func cleanInput(text string) []string {
 	})
 }
 
-func commandExit() {
+func commandExit() error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
-}
-
-type cliCommand struct {
-	name        string
-	description string
-	callback    func()
+	return nil
 }
 
 func main() {
+	type cliCommand struct {
+		name        string
+		description string
+		callback    func() error
+	}
+
 	registry := map[string]cliCommand{
 		"exit": {
 			name:        "exit",
@@ -46,7 +47,9 @@ func main() {
 		cmd := registry[parseIn[0]]
 
 		if value, exists := registry[cmd.name]; exists {
-			value.callback()
+			if err := value.callback(); err != nil {
+				fmt.Println(err)
+			}
 		} else {
 			fmt.Println("Unknown command")
 		}
