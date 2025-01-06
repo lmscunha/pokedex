@@ -41,8 +41,13 @@ func getCmds() map[string]cliCommand {
 		},
 		"map": {
 			name:        "map",
-			description: "Displays the map locations",
+			description: "Displays the next map locations",
 			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous map locations",
+			callback:    commandMapB,
 		},
 	}
 
@@ -52,8 +57,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	registry := getCmds()
 	cfg := config{
-		Next:     "https://pokeapi.co/api/v2/location-area/",
-		Previous: "",
+		Next:     "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20",
+		Previous: "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20",
 	}
 
 	for {

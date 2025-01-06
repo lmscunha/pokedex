@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func commandMap(cfg *config) error {
+func commandMapB(cfg *config) error {
 	type result struct {
 		Name string
 	}
@@ -21,9 +21,9 @@ func commandMap(cfg *config) error {
 		Results  results
 	}
 
-	res, err := http.Get(cfg.Next)
+	res, err := http.Get(cfg.Previous)
 	if err != nil {
-		fmt.Printf("error making get map request %v", err)
+		fmt.Printf("error making get mapb request %v", err)
 		os.Exit(1)
 	}
 
@@ -36,20 +36,18 @@ func commandMap(cfg *config) error {
 		os.Exit(1)
 	}
 	if err != nil {
-		fmt.Printf("error parsing get map response %v", err)
+		fmt.Printf("error parsing get mapb response %v", err)
 		os.Exit(1)
 	}
 
 	var bodyRes response
 	if err = json.Unmarshal(body, &bodyRes); err != nil {
-		fmt.Printf("error parsing get map body %v", err)
+		fmt.Printf("error parsing get mapb body %v", err)
 		os.Exit(1)
 	}
 
+	cfg.Previous = bodyRes.Previous
 	cfg.Next = bodyRes.Next
-	if bodyRes.Previous != "" {
-		cfg.Previous = bodyRes.Previous
-	}
 
 	for _, location := range bodyRes.Results {
 		fmt.Println(location.Name)
