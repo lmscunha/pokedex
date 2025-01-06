@@ -16,10 +16,15 @@ func cleanInput(text string) []string {
 	})
 }
 
+type config struct {
+	Next     string
+	Previous string
+}
+
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(cfg *config) error
 }
 
 func getCmds() map[string]cliCommand {
@@ -34,6 +39,11 @@ func getCmds() map[string]cliCommand {
 			description: "Displays a help message",
 			callback:    commandHelp,
 		},
+		"map": {
+			name:        "map",
+			description: "Displays the map locations",
+			callback:    commandMap,
+		},
 	}
 
 }
@@ -41,6 +51,10 @@ func getCmds() map[string]cliCommand {
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	registry := getCmds()
+	cfg := config{
+		Next:     "https://pokeapi.co/api/v2/location-area/",
+		Previous: "",
+	}
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -51,7 +65,7 @@ func main() {
 		cmd := registry[parseIn[0]]
 
 		if value, exists := registry[cmd.name]; exists {
-			if err := value.callback(); err != nil {
+			if err := value.callback(&cfg); err != nil {
 				fmt.Println(err)
 			}
 		} else {
