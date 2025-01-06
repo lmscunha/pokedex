@@ -58,7 +58,7 @@ func main() {
 	registry := getCmds()
 	cfg := config{
 		Next:     "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20",
-		Previous: "https://pokeapi.co/api/v2/location-area/?offset=0&limit=20",
+		Previous: "",
 	}
 
 	for {

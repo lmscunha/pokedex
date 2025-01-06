@@ -21,6 +21,11 @@ func commandMapB(cfg *config) error {
 		Results  results
 	}
 
+	if cfg.Previous == "" {
+		fmt.Println("you're on the first page")
+		return nil
+	}
+
 	res, err := http.Get(cfg.Previous)
 	if err != nil {
 		fmt.Printf("error making get mapb request %v", err)

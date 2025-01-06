@@ -47,9 +47,7 @@ func commandMap(cfg *config) error {
 	}
 
 	cfg.Next = bodyRes.Next
-	if bodyRes.Previous != "" {
-		cfg.Previous = bodyRes.Previous
-	}
+	cfg.Previous = bodyRes.Previous
 
 	for _, location := range bodyRes.Results {
 		fmt.Println(location.Name)
