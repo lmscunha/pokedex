@@ -6,9 +6,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/lmscunha/pokedexcli/internal/pokecache"
 )
 
-func commandMapB(cfg *config) error {
+func commandMapB(cfg *config, cache *pokecache.Cache) error {
 	type result struct {
 		Name string
 	}
@@ -21,42 +23,59 @@ func commandMapB(cfg *config) error {
 		Results  results
 	}
 
-	if cfg.Previous == "" {
+	url := cfg.Previous
+	fmt.Println("URL INIT MAPB ", url)
+	if url == "" {
 		fmt.Println("you're on the first page")
 		return nil
 	}
 
-	res, err := http.Get(cfg.Previous)
-	if err != nil {
-		fmt.Printf("error making get mapb request %v", err)
-		os.Exit(1)
+	urlData, ok := cache.Get(url)
+	fmt.Println("URL DATA INIT ", len(urlData))
+
+	if ok == false {
+		fmt.Println("NOT CACHE MAPB")
+		res, err := http.Get(url)
+		if err != nil {
+			fmt.Printf("error making get mapb request %v", err)
+			os.Exit(1)
+		}
+
+		body, err := io.ReadAll(res.Body)
+		res.Body.Close()
+
+		if res.StatusCode > 299 {
+			fmt.Printf("response fail with status code %d and\nbody: %s\n",
+				res.StatusCode, body,
+			)
+			os.Exit(1)
+		}
+
+		if err != nil {
+			fmt.Printf("error parsing get mapb response %v", err)
+			os.Exit(1)
+		}
+
+		fmt.Println("KEY BEING STORED INTO THE CACHE MAP ", url)
+		cache.Add(url, body)
+		urlData, ok = cache.Get(url)
 	}
 
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-	if res.StatusCode > 299 {
-		fmt.Printf("response fail with status code %d and\nbody: %s\n",
-			res.StatusCode, body,
-		)
-		os.Exit(1)
-	}
-	if err != nil {
-		fmt.Printf("error parsing get mapb response %v", err)
-		os.Exit(1)
-	}
-
-	var bodyRes response
-	if err = json.Unmarshal(body, &bodyRes); err != nil {
+	var mapData response
+	if err := json.Unmarshal(urlData, &mapData); err != nil {
 		fmt.Printf("error parsing get mapb body %v", err)
 		os.Exit(1)
 	}
 
-	cfg.Previous = bodyRes.Previous
-	cfg.Next = bodyRes.Next
-
-	for _, location := range bodyRes.Results {
+	for _, location := range mapData.Results {
 		fmt.Println(location.Name)
 	}
+
+	fmt.Println("PREVIOUS SAVED ", mapData.Previous)
+	fmt.Println("NEXT SAVED ", mapData.Next)
+
+	cfg.Previous = mapData.Previous
+	cfg.Next = mapData.Next
 
 	return nil
 }

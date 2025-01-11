@@ -6,6 +6,9 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"time"
+
+	"github.com/lmscunha/pokedexcli/internal/pokecache"
 )
 
 func cleanInput(text string) []string {
@@ -24,7 +27,7 @@ type config struct {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(cfg *config) error
+	callback    func(cfg *config, cache *pokecache.Cache) error
 }
 
 func getCmds() map[string]cliCommand {
@@ -61,6 +64,9 @@ func main() {
 		Previous: "",
 	}
 
+	duration := 10 * time.Second
+	cache := pokecache.NewCache(duration)
+
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
@@ -70,7 +76,7 @@ func main() {
 		cmd := registry[parseIn[0]]
 
 		if value, exists := registry[cmd.name]; exists {
-			if err := value.callback(&cfg); err != nil {
+			if err := value.callback(&cfg, cache); err != nil {
 				fmt.Println(err)
 			}
 		} else {

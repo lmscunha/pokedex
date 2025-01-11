@@ -1,6 +1,7 @@
 package pokecache
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -13,13 +14,17 @@ type cacheEntry struct {
 type Cache struct {
 	cacheEntries map[string]cacheEntry
 	mu           sync.Mutex
+	stop         chan struct{}
 }
 
 func NewCache(interval time.Duration) *Cache {
-	cache := &Cache{}
+	cache := &Cache{
+		cacheEntries: make(map[string]cacheEntry),
+		stop:         make(chan struct{}),
+	}
 
 	if interval != 0 {
-		cache.reapLoop(interval)
+		go cache.reapLoop(interval)
 	}
 
 	return cache
@@ -28,28 +33,49 @@ func NewCache(interval time.Duration) *Cache {
 func (c *Cache) Add(key string, val []byte) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	c.cacheEntries[key] = cacheEntry{
 		createdAt: time.Now(),
 		val:       val,
 	}
+
+	fmt.Println("LEN ALL ENTRIES in ADD ", len(c.cacheEntries))
 }
 
 func (c *Cache) Get(key string) ([]byte, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	entry, ok := c.cacheEntries[key]
 	if ok == false {
 		return nil, false
 	}
 
+	fmt.Println("LEN ALL ENTRIES in GET ", len(c.cacheEntries))
 	return entry.val, true
 }
 
 func (c *Cache) reapLoop(interval time.Duration) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
-  for _, entry := range c.cacheEntries {
-    if entry.createdAt
-  }
+	for {
+		select {
+		case <-c.stop:
+			return
+		case <-ticker.C:
+			c.mu.Lock()
+			now := time.Now()
+			for k, entry := range c.cacheEntries {
+				if now.Sub(entry.createdAt) >= interval {
+					delete(c.cacheEntries, k)
+				}
+			}
+			c.mu.Unlock()
+		}
+	}
+}
+
+func (c *Cache) Stop() {
+	close(c.stop)
 }
