@@ -1,7 +1,6 @@
 package pokecache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -38,8 +37,6 @@ func (c *Cache) Add(key string, val []byte) {
 		createdAt: time.Now(),
 		val:       val,
 	}
-
-	fmt.Println("LEN ALL ENTRIES in ADD ", len(c.cacheEntries))
 }
 
 func (c *Cache) Get(key string) ([]byte, bool) {
@@ -51,7 +48,6 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 		return nil, false
 	}
 
-	fmt.Println("LEN ALL ENTRIES in GET ", len(c.cacheEntries))
 	return entry.val, true
 }
 

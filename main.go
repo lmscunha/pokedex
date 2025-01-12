@@ -64,7 +64,7 @@ func main() {
 		Previous: "",
 	}
 
-	duration := 10 * time.Second
+	duration := 5 * time.Second
 	cache := pokecache.NewCache(duration)
 
 	for {

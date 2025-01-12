@@ -25,10 +25,8 @@ func commandMap(cfg *config, cache *pokecache.Cache) error {
 
 	url := cfg.Next
 	urlData, ok := cache.Get(url)
-	fmt.Println("URL DATA INIT ", len(urlData))
 
 	if ok == false {
-		fmt.Println("NOT CACHE MAP")
 		res, err := http.Get(url)
 		if err != nil {
 			fmt.Printf("error making get map request %v", err)
@@ -50,7 +48,6 @@ func commandMap(cfg *config, cache *pokecache.Cache) error {
 			os.Exit(1)
 		}
 
-		fmt.Println("KEY BEING STORED INTO THE CACHE MAP ", url)
 		cache.Add(url, body)
 		urlData, ok = cache.Get(url)
 	}
@@ -64,9 +61,6 @@ func commandMap(cfg *config, cache *pokecache.Cache) error {
 	for _, location := range mapData.Results {
 		fmt.Println(location.Name)
 	}
-
-	fmt.Println("PREVIOUS SAVED ", mapData.Previous)
-	fmt.Println("NEXT SAVED ", mapData.Next)
 
 	cfg.Next = mapData.Next
 	cfg.Previous = mapData.Previous
